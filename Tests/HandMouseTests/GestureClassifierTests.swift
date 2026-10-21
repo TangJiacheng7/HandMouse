@@ -1,3 +1,4 @@
+
 import CoreGraphics
 import XCTest
 @testable import HandMouse
@@ -25,15 +26,16 @@ final class GestureClassifierTests: XCTestCase {
         XCTAssertLessThan(reading.pinchRatio, 0.42)
     }
 
-    func testClassifierUsesNormalizedPreviewCoordinates() throws {
+    func testPointerDirectionCanDifferFromSkeletonPreview() throws {
         var pose = HandPoseFrame.syntheticPoint()
         var points = pose.landmarks
         points[.indexTip] = CGPoint(x: 0.72, y: 0.80)
         pose = HandPoseFrame(landmarks: points, confidence: 1, timestamp: 0)
         let reading = classifier.classify(pose)
         let pointer = try XCTUnwrap(reading.pointer)
-        XCTAssertEqual(Double(pointer.x), 0.72, accuracy: 0.0001)
+        XCTAssertEqual(Double(pointer.x), 0.28, accuracy: 0.0001)
         XCTAssertEqual(Double(pointer.y), 0.80, accuracy: 0.0001)
+        XCTAssertEqual(Double(pose.landmarks[.indexTip]!.x), 0.72, accuracy: 0.0001)
     }
 
     func testClosedFistDoesNotClick() {
