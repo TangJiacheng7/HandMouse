@@ -1,3 +1,4 @@
+
 #!/bin/zsh
 set -euo pipefail
 
@@ -48,8 +49,10 @@ case "$rung" in
   F4)
     "$root/scripts/build_app.sh"
     plutil -extract NSCameraUsageDescription raw \
-      "$root/build/HandMouse.app/Contents/Info.plist" | grep -q '不会保存或上传'
-    test -x "$root/build/HandMouse.app/Contents/MacOS/HandMouse"
+      "$root/outputs/HandMouse.app/Contents/Info.plist" | grep -q '不会保存或上传'
+    test -x "$root/outputs/HandMouse.app/Contents/MacOS/HandMouse"
+    codesign -d -r- "$root/outputs/HandMouse.app" 2>&1 |
+      grep -q 'identifier "local.handmouse.app"'
     ;;
   *)
     printf 'unknown rung: %s\n' "$rung" >&2
