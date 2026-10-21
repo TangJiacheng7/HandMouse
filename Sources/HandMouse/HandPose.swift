@@ -1,3 +1,4 @@
+
 import CoreGraphics
 import Foundation
 
@@ -178,9 +179,9 @@ struct GestureClassifier {
             mode = .none
         }
 
-        // HandPoseTracker normalizes every landmark into the same mirrored,
-        // top-left coordinate space used by the camera preview.
-        let pointer = indexTip
+        // Keep the skeleton in preview coordinates, but invert only the
+        // pointer's horizontal motion so physical left/right matches the user.
+        let pointer = CGPoint(x: 1 - indexTip.x, y: indexTip.y)
         return GestureReading(
             mode: mode,
             pointer: pointer,
