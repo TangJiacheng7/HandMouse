@@ -1,3 +1,4 @@
+
 #!/bin/zsh
 set -euo pipefail
 
@@ -16,9 +17,9 @@ swift build --disable-sandbox -c release \
   --config-path "$swift_config" \
   --security-path "$swift_config"
 
-app="$root/build/HandMouse.app"
+app="$root/outputs/HandMouse.app"
 contents="$app/Contents"
-mkdir -p "$root/build"
+mkdir -p "$root/outputs"
 rm -rf "$app"
 mkdir -p "$contents/MacOS" "$contents/Resources"
 
@@ -27,12 +28,15 @@ cp "$root/Resources/Info.plist" "$contents/Info.plist"
 chmod +x "$contents/MacOS/HandMouse"
 
 plutil -lint "$contents/Info.plist" >/dev/null
-codesign --force --deep --sign - "$app" >/dev/null 2>&1
+codesign --force --deep --sign - \
+  --identifier "local.handmouse.app" \
+  --requirements '=designated => identifier "local.handmouse.app"' \
+  "$app" >/dev/null 2>&1
 
-deliverable="$root/outputs/HandMouse.app"
-mkdir -p "$root/outputs"
-rm -rf "$deliverable"
-ditto "$app" "$deliverable"
+requirement="$(codesign -d -r- "$app" 2>&1)"
+if [[ "$requirement" != *'identifier "local.handmouse.app"'* ]]; then
+  printf 'stable code requirement missing: %s\n' "$requirement" >&2
+  exit 1
+fi
 
 printf 'built=%s\n' "$app"
-printf 'deliverable=%s\n' "$deliverable"
